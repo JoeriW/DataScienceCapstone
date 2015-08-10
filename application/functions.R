@@ -29,7 +29,56 @@ txt_profanitycheck <- function(text){
         return(txt)
 }
 
-txt_prediction >- function(text){
-        
-        
+
+ngram_prob <- function(txt_ngrams) {
+        prob <-txt_ngrams$freq/as.numeric(lapply(txt_ngrams$predictor,FUN=function(x)sum(txt_ngrams[grep(x,txt_ngrams$predictor),1])))              
 }
+                      
+     
+
+txt_prediction <- function(text,predictions){
+        txt <- unlist(strsplit(text," "))
+        alpha <- 0.4
+        backoff <- 0
+        temp <- NULL
+        
+        if (length(txt)==3){
+                temp <- rbind(fourgrams[grep(paste(txt,collapse=" "),x=fourgrams$predictor),],temp)
+                temp$prob <- (alpha^backoff) * ngram_prob(temp)
+                
+                if (nrow(temp) < predictions){
+                        txt_sizing(txt,2)
+                        backoff <- backoff + 1
+                }
+                
+        }
+        if (length(txt)==2){
+                temp <- rbind(trigrams[grep(paste(txt,collapse=" "),x=trigrams$predictor),],temp)
+                temp$prob <- (alpha^backoff) * ngram_prob(temp)
+                
+                if (nrow(temp) < predictions){
+                        txt_sizing(txt,1)
+                        backoff <- backoff + 1
+                }
+                
+                
+        }
+        if (length(txt)==1){
+                temp <- bigrams[grep(paste(txt,collapse=" "),x=bigrams$predictor),]
+                temp$prob <- (alpha^backoff)*ngram_prob(temp)
+                
+                if (nrow(temp) < predictions){
+                        txt_sizing(txt,1)
+                        backoff <- backoff + 1
+                }
+        }
+        if (backoff > 0){
+                temp$prob <- (alpha^backoff) * (unigrams$freq/sum(unigrams$freq))
+                temp <- head(temp,predictions)               
+                
+        }
+        
+        temp <- head(temp,predictions)
+        return(temp)
+}
+
