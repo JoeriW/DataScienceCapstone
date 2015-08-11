@@ -12,11 +12,16 @@ shinyUI(fluidPage(
                                      tags$b("Note:"),
                                      p("only the last 3 valid words (i.e. excluding profane/insulting terms) of the input are relevant for the prediction algorithm."),
                                      br(),
-                                     textInput('inputText',"Enter text here:",value=" "),
+                                     textInput('inputText',"Enter text here:",value="this is a"),
                                      submitButton("predict next word",icon=icon("magic",lib="font-awesome")),
                                      br(),
                                      h4("Top prediction:"),
-                                     textOutput('cleanText')
+                                     verbatimTextOutput('top1Text'),
+                                     h4("2nd prediction:"),
+                                     verbatimTextOutput('top2Text'),   
+                                     h4("3rd prediction:"),
+                                     verbatimTextOutput('top3Text')   
+                                     
                             ),
                             
                             

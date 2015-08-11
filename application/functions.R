@@ -29,56 +29,64 @@ txt_profanitycheck <- function(text){
         return(txt)
 }
 
-
 ngram_prob <- function(txt_ngrams) {
         prob <-txt_ngrams$freq/as.numeric(lapply(txt_ngrams$predictor,FUN=function(x)sum(txt_ngrams[grep(x,txt_ngrams$predictor),1])))              
+        return(prob)
 }
-                      
-     
 
 txt_prediction <- function(text,predictions){
         txt <- unlist(strsplit(text," "))
         alpha <- 0.4
         backoff <- 0
-        temp <- NULL
+        temp4 <- NULL
+        temp3<- NULL
+        temp2<- NULL
+        temp1<-NULL
+        temp<-NULL
         
         if (length(txt)==3){
-                temp <- rbind(fourgrams[grep(paste(txt,collapse=" "),x=fourgrams$predictor),],temp)
-                temp$prob <- (alpha^backoff) * ngram_prob(temp)
+                txt <- paste(txt,collapse=" ")
+                temp4 <- fourgrams[grep(paste0("^",txt,"$"),x=fourgrams$predictor),]
+                temp4$pseudoprob <- (alpha^backoff) * ngram_prob(temp4)
+                temp <- rbind(temp4,temp)
                 
                 if (nrow(temp) < predictions){
-                        txt_sizing(txt,2)
                         backoff <- backoff + 1
-                }
-                
+                        txt <- unlist(strsplit(txt_sizing(txt,2)," "))
+                        
+                }  
         }
         if (length(txt)==2){
-                temp <- rbind(trigrams[grep(paste(txt,collapse=" "),x=trigrams$predictor),],temp)
-                temp$prob <- (alpha^backoff) * ngram_prob(temp)
+                txt <- paste(txt,collapse=" ")
+                temp3 <- trigrams[grep(paste0("^",txt,"$"),x=trigrams$predictor),]
+                temp3$pseudoprob <- (alpha^backoff) * ngram_prob(temp3)
+                temp <- rbind(temp3,temp)
                 
                 if (nrow(temp) < predictions){
-                        txt_sizing(txt,1)
                         backoff <- backoff + 1
-                }
-                
-                
+                        txt <- unlist(strsplit(txt_sizing(txt,1)," "))
+                        
+                }  
         }
         if (length(txt)==1){
-                temp <- bigrams[grep(paste(txt,collapse=" "),x=bigrams$predictor),]
-                temp$prob <- (alpha^backoff)*ngram_prob(temp)
+                txt <- paste(txt,collapse=" ")
+                temp2 <- bigrams[grep(paste0("^",txt,"$"),x=bigrams$predictor),]
+                temp2$pseudoprob <- (alpha^backoff)*ngram_prob(temp2)
+                temp <- rbind(temp2,temp)
                 
-                if (nrow(temp) < predictions){
-                        txt_sizing(txt,1)
+                if (nrow(temp)<predictions){
                         backoff <- backoff + 1
+                        topUnigrams <- head(unigrams,predictions-nrow(temp))
+                        temp1$freq <- topUnigrams$freq
+                        temp1$predictor <- "NA"
+                        temp1$prediction <- topUnigrams$word
+                        temp1$pseudoprob <- (alpha^backoff) * (temp1$freq/sum(unigrams$freq))
+                        temp1 <- as.data.frame(temp1)
+                        temp <- rbind(temp1,temp)
                 }
         }
-        if (backoff > 0){
-                temp$prob <- (alpha^backoff) * (unigrams$freq/sum(unigrams$freq))
-                temp <- head(temp,predictions)               
-                
-        }
         
-        temp <- head(temp,predictions)
-        return(temp)
+        temp <- temp[order(temp$predictor,decreasing=T),]
+        return(head(temp,predictions))
 }
 
