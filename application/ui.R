@@ -1,7 +1,7 @@
 library(shiny)
 
 shinyUI(fluidPage(
-        titlePanel("Swift Key:John Hopkins Data science capstone project"),
+        titlePanel("John Hopkins University Data Science Capstone Project"),
         
         mainPanel(
                 tabsetPanel(type = "tabs",
@@ -21,8 +21,7 @@ shinyUI(fluidPage(
                                      verbatimTextOutput('top2Text'),   
                                      h4("3rd prediction:"),
                                      verbatimTextOutput('top3Text')   
-                                     
-                            ),
+                                     ),
                             
                             
                             tabPanel("Algorithm"),

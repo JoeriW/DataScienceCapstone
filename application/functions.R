@@ -86,7 +86,16 @@ txt_prediction <- function(text,predictions){
                 }
         }
         
-        temp <- temp[order(temp$predictor,decreasing=T),]
+        if (length(txt)==0){
+                temp$freq[1:predictions] <- "no valid input detected"
+                temp$predictor[1:predictions] <- "no valid input detected"
+                temp$prediction[1:predictions] <- "no valid input detected"
+                temp$pseudoprob[1:predictions] <- "no valid input detected"
+                temp <- as.data.frame(temp)
+        }
+        
+        
+        temp <- temp[order(temp$pseudoprob,decreasing=T),]
         return(head(temp,predictions))
 }
 
